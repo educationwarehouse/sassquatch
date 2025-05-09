@@ -1,2 +1,6 @@
-def main() -> None:
-    print("Hello from sassquatch!")
+
+from .core import compile
+
+__all__ = [
+    "compile"
+]
