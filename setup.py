@@ -3,6 +3,7 @@ import os
 import platform
 import shutil
 import subprocess
+import sys
 import tarfile
 import urllib.request
 from pathlib import Path
@@ -93,6 +94,9 @@ class DownloadDependencyCommand(install):
     def run(self):
         # First run the standard install
         install.run(self)
+
+        if "/dist/" in sys.argv[-1]:
+            raise ValueError("Error: this looks like a wheel build. Maybe try running `hatch build -t sdist`")
 
         # Then download and install the custom dependency
         package_dir = Path(self.install_lib) / "sassquatch"
