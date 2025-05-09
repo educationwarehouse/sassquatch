@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.1.3 (2025-05-09)
+
+### Fix
+
+* Set load_path to list, add defautls to CompileError ([`0ba2713`](https://github.com/educationwarehouse/sassquatch/commit/0ba27137bd49369cc3c3c0fe2e1940dcca820c25))
+
 ## v0.1.2 (2025-05-09)
 
 ### Fix
