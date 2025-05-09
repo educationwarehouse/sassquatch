@@ -35,7 +35,7 @@ class InvalidCompileOption(SassquatchError):
 
 
 @dataclass
-class CompilationError(SassquatchError):
+class CompileError(SassquatchError):
     """
     Represents an error thrown by dart-sass.
     """
@@ -86,7 +86,7 @@ def run(args: list[Path | str], stdin: str = "", quiet: bool = False):
     exit_code = p.returncode
 
     if exit_code > 0:
-        raise CompilationError(
+        raise CompileError(
             exit_code,
             stdout,
             stderr,
@@ -204,7 +204,7 @@ def main() -> None:
             print("No filename passed, reading from stdin:\n", file=sys.stderr)
             string = sys.stdin.read()  # until end of input
             result = compile(string, **settings)
-    except CompilationError as e:
+    except CompileError as e:
         print(e, file=sys.stderr)
         exit(e.exit_code)
 
