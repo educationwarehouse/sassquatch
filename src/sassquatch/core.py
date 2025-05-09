@@ -40,9 +40,9 @@ class CompileError(SassquatchError):
     Represents an error thrown by dart-sass.
     """
 
-    exit_code: int
-    stdout: str
-    stderr: str
+    exit_code: int = 1
+    stdout: str = ""
+    stderr: str = ""
 
     def __str__(self):
         return f"\n[exit code]\n{self.exit_code}\n\n[stdout]\n{self.stdout}\n\n[stderr]\n{self.stderr}\n\n"
@@ -58,7 +58,7 @@ class SassSettings(t.TypedDict, total=False):
     sass_update: bool
     # dart-sass (https://sass-lang.com/documentation/cli/dart-sass/)
     indented: bool
-    load_path: str
+    load_path: list[str]
     pkg_importer: str
     style: t.Literal["expanded", "compressed"]
     no_charset: bool

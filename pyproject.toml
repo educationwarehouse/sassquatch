@@ -8,7 +8,7 @@ authors = [
 ]
 requires-python = ">=3.12"
 dependencies = [
-    "sleazy",
+    "sleazy >= 0.1.1",
 ]
 
 [project.optional-dependencies]
