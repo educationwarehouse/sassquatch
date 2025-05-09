@@ -1,4 +1,10 @@
-from .core import compile, SassSettings, SassquatchError, CompileError, InvalidCompileOption
+from .core import (
+    CompileError,
+    InvalidCompileOption,
+    SassquatchError,
+    SassSettings,
+    compile,
+)
 
 __all__ = [
     "compile",
