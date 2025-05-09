@@ -1,18 +1,20 @@
 import sys
-import typing
 import typing as t
 from dataclasses import dataclass
 from pathlib import Path
-from subprocess import Popen, PIPE
+from subprocess import PIPE, Popen
 from typing import Optional
 
-from sleazy import typeddict_to_cli_args, parse_args_from_typeddict
+from sleazy import parse_args_from_typeddict, typeddict_to_cli_args
 
 
 # find sass binary:
 def sass_binary() -> Path:
     src = Path(__file__).parent
-    return src/ "vendor" / "dart-sass" / "sass"
+    return src / "vendor" / "dart-sass" / "sass"
+
+
+SASS = sass_binary()
 
 
 class SassquatchError(Exception):
@@ -25,16 +27,19 @@ class SassquatchError(Exception):
     and provide more specific error messages or debugging information.
     """
 
+
 class InvalidCompileOption(SassquatchError):
     """
     Represents an error raised when an invalid compilation option is encountered.
     """
+
 
 @dataclass
 class CompilationError(SassquatchError):
     """
     Represents an error thrown by dart-sass.
     """
+
     exit_code: int
     stdout: str
     stderr: str
@@ -42,24 +47,40 @@ class CompilationError(SassquatchError):
     def __str__(self):
         return f"\n[exit code]\n{self.exit_code}\n\n[stdout]\n{self.stdout}\n\n[stderr]\n{self.stderr}\n\n"
 
+
 T = t.TypeVar("T")
 
+
 class SassSettings(t.TypedDict, total=False):
-    # sassquatch:
-    filename: t.Annotated[str, 'positional']
+    # sassquatch
+    filename: t.Annotated[str, "positional"]
     version: bool
-    # dart-sass:
+    sass_update: bool
+    # dart-sass (https://sass-lang.com/documentation/cli/dart-sass/)
     indented: bool
     load_path: str
     pkg_importer: str
-    style: typing.Literal["expanded", "compressed"]
+    style: t.Literal["expanded", "compressed"]
+    no_charset: bool
+    error_css: bool
+    # these options only work on directories:
+    update: bool
+    no_source_map: bool
+    source_map_urls: t.Literal["relative", "absolute"]
+    embed_sources: bool
+    embed_source_map: bool
+    watch: bool
+    verbose: bool
+    quiet: bool
+
 
 def choose_exactly_n(options: t.Iterable[T], n: int = 1) -> bool:
     options = set(options) if not isinstance(options, set) else options
 
     return len(options - {None}) == n
 
-def run(args: list[Path | str], stdin=""):
+
+def run(args: list[Path | str], stdin: str = "", quiet: bool = False):
     p = Popen(args, stdout=PIPE, stdin=PIPE, stderr=PIPE, text=True)
     stdout, stderr = p.communicate(input=stdin)
     exit_code = p.returncode
@@ -71,11 +92,15 @@ def run(args: list[Path | str], stdin=""):
             stderr,
         )
 
-    # todo: verbosity level:
-    print(stderr, file=sys.stderr)
+    if not quiet:
+        print(stderr, file=sys.stderr)
+
     return stdout
 
-def compile_string(string: str, sass: Path = sass_binary(), **settings: t.Unpack[SassSettings]) -> str:
+
+def compile_string(
+    string: str, sass: Path = SASS, **settings: t.Unpack[SassSettings]
+) -> str:
     """
     Compiles SCSS code from a string.
 
@@ -92,14 +117,19 @@ def compile_string(string: str, sass: Path = sass_binary(), **settings: t.Unpack
 
     kwargs = typeddict_to_cli_args(settings, SassSettings)
 
-    return run([sass, "-"] + kwargs, stdin=string)
+    return run([sass, "-"] + kwargs, stdin=string, quiet=settings.get("quiet", False))
+
+
+def compile_path(path: Path, sass: Path = SASS, **settings: t.Unpack[SassSettings]):
+    kwargs = typeddict_to_cli_args(settings, SassSettings)
+
+    return run([sass, path] + kwargs, quiet=settings.get("quiet", False))
 
 
 def compile(
-        string: Optional[str] = None,
-        filename: Optional[str | Path] = None,
-        directory: Optional[str | Path] = None,
-        **settings: t.Unpack[SassSettings]
+    string: Optional[str] = None,
+    path: Optional[str | Path] = None,
+    **settings: t.Unpack[SassSettings],
 ) -> str:
     """
     Compiles SCSS code from either a string, file or directory (exactly one of these options must be chosen).
@@ -108,26 +138,37 @@ def compile(
         InvalidCompileOption: when invalid options are passed
         CompilationError: when something goes wrong in dart-sass
     """
-    # todo: exactly 1 of string, filename and directory should be chosen.
-
-    if not choose_exactly_n({string, filename, directory}):
-        raise ValueError("Exactly one of string, filename or directory must be provided.")
+    if not choose_exactly_n({string, path}, 1):
+        raise InvalidCompileOption("Exactly one of string or path must be provided.")
 
     if string is not None:
         return compile_string(string, **settings)
-    elif filename is not None:
-        filepath = Path(filename) if not isinstance(filename, Path) else filename
-        return compile(string=filepath.read_text(), **settings)
+    elif path is not None:
+        filepath = Path(path) if not isinstance(path, Path) else path
+        # todo: don't read file (so more features like --watch work); support directories
+        return compile_path(filepath, **settings)
     else:
-        raise NotImplementedError("TODO: directory compilation")
+        # this should already be checked by `choose_exactly_n` but let's just throw the error again anyway:
+        raise InvalidCompileOption("Exactly one of string or path must be provided.")
 
-def show_versions(sass: Path = sass_binary()) -> None:
+
+def show_versions(sass: Path = SASS) -> None:
     from .__about__ import __version__ as sassquatch_version
+
     dart_sass_version = run([sass, "--version"])
 
     print("Sassquatch:", sassquatch_version)
     print("Dart Sass: ", dart_sass_version)
-    # todo: function to upgrade dart-sass
+
+
+def sass_update():
+    # update vendor version of dart-sass
+    # see setup.py
+    from .build import install_dart_sass  # noqa
+
+    pkg_dir = Path(__file__).parent
+    install_dart_sass(pkg_dir)
+
 
 def main() -> None:
     """
@@ -140,20 +181,35 @@ def main() -> None:
     # use sys.argv to compile file/files/directory or otherwise use stdin
     settings = parse_args_from_typeddict(SassSettings)
 
+    if settings.get("sass_update"):
+        return sass_update()
+
+    if not SASS.exists():
+        print(
+            "ERR: missing sass binary, the program can not continue.", file=sys.stderr
+        )
+        print(
+            "Try `sassquatch --sass-update` to download the dependency.",
+            file=sys.stderr,
+        )
+        exit(1)
+
     if settings.get("version"):
         return show_versions()
 
     try:
         if filename := settings.pop("filename", None):
-            # todo: check if name is file or directory
-            result = compile(filename=filename, **settings)
+            result = compile(path=filename, **settings)
         else:
             print("No filename passed, reading from stdin:\n", file=sys.stderr)
-            string = sys.stdin.read() # until end of input
+            string = sys.stdin.read()  # until end of input
             result = compile(string, **settings)
     except CompilationError as e:
         print(e, file=sys.stderr)
         exit(e.exit_code)
 
-    print("--- start of compiled css ---", file=sys.stderr)
-    print(result)
+    if result.strip():
+        print("--- start of compiled css ---", file=sys.stderr)
+        print(result)
+
+    exit(0)

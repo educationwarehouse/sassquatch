@@ -12,4 +12,6 @@ bun.lockb
 node_modules/
 uv.lock
 *.scss
+*.css
+*.map
 package.json

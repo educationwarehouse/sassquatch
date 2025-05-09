@@ -1,6 +1,3 @@
-
 from .core import compile
 
-__all__ = [
-    "compile"
-]
+__all__ = ["compile"]
