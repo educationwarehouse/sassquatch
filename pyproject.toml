@@ -8,12 +8,13 @@ authors = [
 ]
 requires-python = ">=3.12"
 dependencies = [
-    "sleazy >= 0.1.1",
+    "sleazy >= 0.2.0, < 1",
 ]
 
 [project.optional-dependencies]
 dev = [
     "pytest",
+    "pytest-cov",
 ]
 
 

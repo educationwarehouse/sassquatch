@@ -5,7 +5,7 @@ from pathlib import Path
 from subprocess import PIPE, Popen
 from typing import Optional
 
-from sleazy import parse_args_from_typeddict, typeddict_to_cli_args
+import sleazy
 
 
 # find sass binary:
@@ -53,7 +53,7 @@ T = t.TypeVar("T")
 
 class SassSettings(t.TypedDict, total=False):
     # sassquatch
-    filename: t.Annotated[str, "positional"]
+    filename: t.Annotated[str, "1"]
     version: bool
     sass_update: bool
     # dart-sass (https://sass-lang.com/documentation/cli/dart-sass/)
@@ -115,13 +115,13 @@ def compile_string(
         CompilationError: when something goes wrong in dart-sass
     """
 
-    kwargs = typeddict_to_cli_args(settings, SassSettings)
+    kwargs = sleazy.stringify(settings, SassSettings)
 
     return run([sass, "-"] + kwargs, stdin=string, quiet=settings.get("quiet", False))
 
 
 def compile_path(path: Path, sass: Path = SASS, **settings: t.Unpack[SassSettings]):
-    kwargs = typeddict_to_cli_args(settings, SassSettings)
+    kwargs = sleazy.stringify(settings, SassSettings)
 
     return run([sass, path] + kwargs, quiet=settings.get("quiet", False))
 
@@ -179,7 +179,7 @@ def main() -> None:
     SCSS code and provides an appropriate output or result.
     """
     # use sys.argv to compile file/files/directory or otherwise use stdin
-    settings = parse_args_from_typeddict(SassSettings)
+    settings = sleazy.parse(SassSettings)
 
     if settings.get("sass_update"):
         return sass_update()
