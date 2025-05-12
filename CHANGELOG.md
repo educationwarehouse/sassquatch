@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.1.4 (2025-05-12)
+
+### Fix
+
+* Bump to `sleazy` 0.2.0 with updated syntax; started on tests (first test: if dart/sass gets embedded properly) ([`1d2a8e7`](https://github.com/educationwarehouse/sassquatch/commit/1d2a8e71cacac1f9e0c93b8d496ddea6a1e096d5))
+
 ## v0.1.3 (2025-05-09)
 
 ### Fix
