@@ -30,7 +30,7 @@ During installation, Sassquatch will automatically download the latest version o
 
 Sassquatch follows [Dart Sass CLI semantics](https://sass-lang.com/documentation/cli/dart-sass/):
 
-```shell script
+```bash
 # Compile a file to stdout
 sassquatch path/to/input.scss
 
@@ -41,10 +41,16 @@ sassquatch path/to/input.scss:path/to/output.css
 sassquatch path/to/input_dir:path/to/output_dir
 
 # Compile from stdin
-echo "body { color: red; }" | sassquatch -
+echo "body { color: red; }" | sassquatch
 
 # Compile with options
 sassquatch path/to/input.scss --style=compressed --no-charset
+
+# update embedded sass version:
+sassquatch --sass-update
+
+# see all options:
+sassquatch --help
 ```
 
 ### Python API
@@ -92,10 +98,6 @@ For a full list of options, refer to the [Dart Sass documentation](https://sass-
 
 Sassquatch is based on Dart Sass (embedded mode) and downloads the latest version of the Dart Sass binary during
 installation. This ensures you always have access to the most up-to-date Sass features and fixes.
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
