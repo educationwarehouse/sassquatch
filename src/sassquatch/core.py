@@ -53,7 +53,7 @@ T = t.TypeVar("T")
 
 class SassSettings(t.TypedDict, total=False):
     # sassquatch
-    filename: t.Annotated[str, "?"] # optional for stdin
+    filename: t.Annotated[str, "?"]  # optional for stdin
     version: bool
     sass_update: bool
     # dart-sass (https://sass-lang.com/documentation/cli/dart-sass/)
