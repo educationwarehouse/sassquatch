@@ -2,6 +2,18 @@
 
 <!--next-version-placeholder-->
 
+## v1.0.0 (2025-05-19)
+
+### Fix
+
+* Make filename optional so you can do `--version` etc. ([`ba435ce`](https://github.com/educationwarehouse/sassquatch/commit/ba435ceeb40ecc007b59117cfa9825fcb3c0d2d3))
+* Support `sassquatch -` to read from stdin again ([`065bd7b`](https://github.com/educationwarehouse/sassquatch/commit/065bd7b34682a5a6ac017d78fb4eede2740abc37))
+
+### Documentation
+
+* Improved readme ([`74564df`](https://github.com/educationwarehouse/sassquatch/commit/74564df4470e1b4f21760e8eacc9860148d050d5))
+* Added README ([`5af6262`](https://github.com/educationwarehouse/sassquatch/commit/5af6262c0d8a3c1e0ccd22d7bc95db89545083b9))
+
 ## v0.1.4 (2025-05-12)
 
 ### Fix
