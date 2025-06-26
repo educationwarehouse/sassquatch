@@ -37,6 +37,10 @@ def get_platform_tag():
     system = platform.system().lower()
     machine = platform.machine().lower()
 
+    system_os = {
+        "darwin": "macos",
+    }.get(system, system)
+
     arch = {
         "x86_64": "x64",
         "amd64": "x64",
@@ -48,10 +52,9 @@ def get_platform_tag():
         "riscv64": "riscv64",
     }.get(machine, machine)
 
-    tag = f"{system}-{arch}"
-    if system == "linux":
-        if is_musl():
-            tag += "-musl"
+    tag = f"{system_os}-{arch}"
+    if system_os == "linux" and is_musl():
+        tag += "-musl"
     return tag
 
 
