@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v1.0.1 (2025-06-26)
+
+### Fix
+
+* Map `platform.system() = darwin` to `macos` for proper dart-sass downloading on mac (intel and arm) ([`4892bf1`](https://github.com/educationwarehouse/sassquatch/commit/4892bf1b005110e947b2fff4912bd651e3967f07))
+
 ## v1.0.0 (2025-05-19)
 
 ### Fix
