@@ -1,6 +1,5 @@
 [project]
 name = "sassquatch"
-dynamic = ["version"]
 description = "Dart Sass (Embedded) in Python"
 readme = "README.md"
 authors = [
@@ -10,6 +9,7 @@ requires-python = ">=3.12"
 dependencies = [
     "sleazy >= 0.2.0, < 1",
 ]
+version = "1.0.1"
 
 [project.optional-dependencies]
 dev = [
@@ -22,16 +22,51 @@ dev = [
 sassquatch = "sassquatch.core:main"
 
 [build-system]
-requires = ["hatchling", "setuptools>=42"]
+requires = ["setuptools>=42"]
 build-backend = "setuptools.build_meta"
 
-[tool.setuptools.dynamic]
-version = {attr = "sassquatch.__about__.__version__"}
+[tool.vommit]
+allow_breaking_bang = true
+allow_breaking_footer = true
+prerelease_token = "beta"
+confirm = true
+ignore = []
 
-[tool.semantic_release]
+[tool.vommit.git]
+enabled = true
+origin = "origin"
 branch = "master"
-version_variable = "src/sassquatch/__about__.py:__version__"
-change_log = "CHANGELOG.md"
-upload_to_repository = false
-upload_to_release = false
-build_command = "hatch build --target sdist"
+on_wrong_branch = "error"
+tag_format = "v{version}"
+commit_format = "{version}"
+
+[tool.vommit.changelog]
+enabled = true
+file = "CHANGELOG.md"
+include_prereleases = false
+placeholder = "<!--next-version-placeholder-->"
+placeholder_regex = "<auto>"
+entry_title_format = "## v{version} ({date:%Y-%m-%d})"
+
+[tool.vommit.changelog.levels]
+feat = "Feature{s}"
+fix = "Fix{es}"
+break = "Breaking Change{s}"
+docs = "Documentation"
+perf = "Performance"
+
+[tool.vommit.pypi]
+enabled = true
+use_keyring = true
+
+[tool.vommit.commands]
+clean = "rm -rf ./dist"
+build = "uv build"
+publish = "uv publish"
+post_publish = ""
+
+[tool.vommit.version_bump_map]
+break = "major"
+feat = "minor"
+fix = "patch"
+perf = "patch"
